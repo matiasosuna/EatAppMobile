@@ -1,5 +1,21 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const storage = {
+  getItem: async (key: string) => {
+    if (Platform.OS === 'web') return localStorage.getItem(key);
+    return AsyncStorage.getItem(key);
+  },
+  setItem: async (key: string, value: string) => {
+    if (Platform.OS === 'web') { localStorage.setItem(key, value); return; }
+    return AsyncStorage.setItem(key, value);
+  },
+  removeItems: async (keys: string[]) => {
+    if (Platform.OS === 'web') { keys.forEach(k => localStorage.removeItem(k)); return; }
+    return AsyncStorage.multiRemove(keys);
+  },
+};
 
 const BASE_URL = 'https://eatapp-api-zyfv.onrender.com/api/v1';
 
@@ -33,12 +49,12 @@ api.interceptors.response.use(
 
 export async function setToken(token: string) {
   (globalThis as any).__eatapp_token = token;
-  await AsyncStorage.setItem('auth_token', token);
+  await storage.setItem('auth_token', token);
 }
 
 export async function setAdmin(isAdmin: boolean) {
   (globalThis as any).__eatapp_is_admin = isAdmin;
-  await AsyncStorage.setItem('is_admin', isAdmin ? '1' : '0');
+  await storage.setItem('is_admin', isAdmin ? '1' : '0');
 }
 
 export function isAdmin(): boolean {
@@ -46,8 +62,8 @@ export function isAdmin(): boolean {
 }
 
 export async function loadSession(): Promise<boolean> {
-  const token = await AsyncStorage.getItem('auth_token');
-  const admin = await AsyncStorage.getItem('is_admin');
+  const token = await storage.getItem('auth_token');
+  const admin = await storage.getItem('is_admin');
   if (token) {
     (globalThis as any).__eatapp_token = token;
     (globalThis as any).__eatapp_is_admin = admin === '1';
@@ -59,7 +75,7 @@ export async function loadSession(): Promise<boolean> {
 export async function clearSession() {
   (globalThis as any).__eatapp_token = null;
   (globalThis as any).__eatapp_is_admin = false;
-  await AsyncStorage.multiRemove(['auth_token', 'is_admin']);
+  await storage.removeItems(['auth_token', 'is_admin']);
 }
 
 // Auth
