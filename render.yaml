@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: eatapp-web
+    runtime: static
+    buildCommand: npx expo export --platform web
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
