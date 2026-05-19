@@ -50,6 +50,7 @@ export default function RestaurantsScreen({ navigation }: any) {
     }
   }, []);
 
+  useEffect(() => { load(); }, []);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   useEffect(() => {

@@ -73,6 +73,7 @@ export default function HomeScreen({ navigation }: any) {
     }
   }, []);
 
+  useEffect(() => { loadRestaurants(); }, []);
   useFocusEffect(useCallback(() => { loadRestaurants(); }, [loadRestaurants]));
 
   const handleSearch = async (q: string, budgetOverride?: string) => {
