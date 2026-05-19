@@ -4,6 +4,7 @@ services:
     runtime: static
     buildCommand: npx expo export --platform web
     staticPublishPath: dist
+    autoDeploy: true
     envVars:
       - key: NODE_VERSION
         value: "20"
