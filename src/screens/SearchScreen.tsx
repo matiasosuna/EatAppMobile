@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Alert, ActivityIndicator, Switch,
+  ScrollView, Alert, ActivityIndicator, Switch, Platform,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { search, triggerScrape } from '../services/api';
+import { search } from '../services/api';
+
+// Da Nang coordinates used as fallback on web
+const DEFAULT_COORDS = { latitude: 16.0544, longitude: 108.2022 };
 
 export default function SearchScreen({ navigation }: any) {
   const [freeText, setFreeText] = useState('');
@@ -17,10 +20,15 @@ export default function SearchScreen({ navigation }: any) {
   const [locLoading, setLocLoading] = useState(true);
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      setLocation(DEFAULT_COORDS);
+      setLocLoading(false);
+      return;
+    }
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permiso de ubicación requerido');
+        setLocation(DEFAULT_COORDS);
         setLocLoading(false);
         return;
       }
@@ -36,9 +44,6 @@ export default function SearchScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      // Trigger OSM scrape in background (won't block search)
-      triggerScrape(location.latitude, location.longitude).catch(() => {});
-
       const res = await search({
         free_text: freeText || undefined,
         budget_max: budget ? parseFloat(budget) : undefined,
