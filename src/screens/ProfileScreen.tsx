@@ -3,7 +3,8 @@ import {
   View, Text, ScrollView, StyleSheet,
   TouchableOpacity, Alert,
 } from 'react-native';
-import api from '../services/api';
+import api, { clearSession } from '../services/api';
+import { useNavigation } from '@react-navigation/native';
 
 const DIETARY_OPTIONS = ['vegetarian', 'vegan', 'gluten_free', 'halal', 'kosher'];
 const ALLERGEN_OPTIONS = ['nuts', 'dairy', 'shellfish', 'eggs', 'soy', 'gluten'];
@@ -31,10 +32,16 @@ function ChipSelector({ label, options, selected, onToggle }: any) {
 }
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<any>();
   const [dietary, setDietary] = useState<string[]>([]);
   const [allergens, setAllergens] = useState<string[]>([]);
   const [cuisineLikes, setCuisineLikes] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
+
+  const handleSignOut = async () => {
+    await clearSession();
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  };
 
   useEffect(() => {
     api.get('/users/me/preferences')
@@ -92,6 +99,10 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.btn} onPress={save}>
         <Text style={styles.btnText}>{saved ? '✓ Saved' : 'Save preferences'}</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+        <Text style={styles.signOutText}>Sign out</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -116,4 +127,9 @@ const styles = StyleSheet.create({
     padding: 18, alignItems: 'center', marginTop: 8,
   },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  signOutBtn: {
+    borderWidth: 1, borderColor: '#ddd', borderRadius: 14,
+    padding: 18, alignItems: 'center', marginTop: 12,
+  },
+  signOutText: { color: '#999', fontSize: 16 },
 });
